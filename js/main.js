@@ -3,16 +3,16 @@ import { sb, q, loadRefs, cache } from './db.js';
 import { $, $$, esc, toast, fail, traduzErro, closeSheet, sheetOpen } from './ui.js';
 
 const ROTAS = {
-  painel:     { t: 'Painel',     m: () => import('./views/painel.js'),     i: '<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>' },
-  agenda:     { t: 'Agenda',     m: () => import('./views/agenda.js'),     i: '<rect x="3" y="5" width="18" height="16" rx="1"/><path d="M3 10h18M8 3v4M16 3v4"/>' },
-  pacientes:  { t: 'Pacientes',  m: () => import('./views/pacientes.js'),  i: '<circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/>' },
-  posvenda:   { t: 'Pós-venda',  m: () => import('./views/posvenda.js'),   i: '<path d="M12 21s-7-4.5-9-9a5 5 0 0 1 9-3 5 5 0 0 1 9 3c-2 4.5-9 9-9 9z"/>', badge: 'pv' },
-  galeria:    { t: 'Antes e depois', m: () => import('./views/galeria.js'), i: '<rect x="3" y="5" width="18" height="15" rx="1"/><path d="M12 5v15M3 15l4-4 5 5M15 13l2-2 4 4"/>' },
-  vendas:     { t: 'Vendas',     m: () => import('./views/vendas.js'),     i: '<path d="M5 2h14v20l-3-2-2 2-2-2-2 2-2-2-3 2z"/><path d="M9 7h6M9 11h6M9 15h3"/>' },
-  estoque:    { t: 'Estoque',    m: () => import('./views/estoque.js'),    i: '<path d="M3 7l9-4 9 4v10l-9 4-9-4z"/><path d="M3 7l9 4 9-4M12 11v10"/>', badge: 'st' },
-  financeiro: { t: 'Financeiro', m: () => import('./views/financeiro.js'), i: '<rect x="3" y="5" width="18" height="14" rx="1"/><path d="M3 10h18M7 15h4"/>' },
-  relatorios: { t: 'Relatórios', m: () => import('./views/relatorios.js'), i: '<path d="M4 4v16h16"/><path d="M8 15l3-4 3 2 5-6"/>' },
-  ajustes:    { t: 'Ajustes',    m: () => import('./views/ajustes.js'),    i: '<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/>' },
+  painel:     { t: 'Painel',     m: () => import('./views/painel.js?v=2'),     i: '<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>' },
+  agenda:     { t: 'Agenda',     m: () => import('./views/agenda.js?v=2'),     i: '<rect x="3" y="5" width="18" height="16" rx="1"/><path d="M3 10h18M8 3v4M16 3v4"/>' },
+  pacientes:  { t: 'Pacientes',  m: () => import('./views/pacientes.js?v=2'),  i: '<circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/>' },
+  posvenda:   { t: 'Pós-venda',  m: () => import('./views/posvenda.js?v=2'),   i: '<path d="M12 21s-7-4.5-9-9a5 5 0 0 1 9-3 5 5 0 0 1 9 3c-2 4.5-9 9-9 9z"/>', badge: 'pv' },
+  galeria:    { t: 'Antes e depois', m: () => import('./views/galeria.js?v=2'), i: '<rect x="3" y="5" width="18" height="15" rx="1"/><path d="M12 5v15M3 15l4-4 5 5M15 13l2-2 4 4"/>' },
+  vendas:     { t: 'Vendas',     m: () => import('./views/vendas.js?v=2'),     i: '<path d="M5 2h14v20l-3-2-2 2-2-2-2 2-2-2-3 2z"/><path d="M9 7h6M9 11h6M9 15h3"/>' },
+  estoque:    { t: 'Estoque',    m: () => import('./views/estoque.js?v=2'),    i: '<path d="M3 7l9-4 9 4v10l-9 4-9-4z"/><path d="M3 7l9 4 9-4M12 11v10"/>', badge: 'st' },
+  financeiro: { t: 'Financeiro', m: () => import('./views/financeiro.js?v=2'), i: '<rect x="3" y="5" width="18" height="14" rx="1"/><path d="M3 10h18M7 15h4"/>' },
+  relatorios: { t: 'Relatórios', m: () => import('./views/relatorios.js?v=2'), i: '<path d="M4 4v16h16"/><path d="M8 15l3-4 3 2 5-6"/>' },
+  ajustes:    { t: 'Ajustes',    m: () => import('./views/ajustes.js?v=2'),    i: '<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/>' },
 };
 
 const root = $('#root');
@@ -106,9 +106,17 @@ export async function atualizarBadges() {
 }
 
 // ---------- rotas ----------
-let rotaAtual = '';
+// Uma tela carrega por vez: se a pessoa tocar em outro menu no meio, a última escolha vence.
+let rotaAtual = '', carregando = false, pendente = false;
 async function rotear() {
   if (!usuario) return;
+  if (carregando) { pendente = true; return; }
+  carregando = true;
+  try {
+    do { pendente = false; await desenhar(); } while (pendente);
+  } finally { carregando = false; }
+}
+async function desenhar() {
   const [nome, ...params] = (location.hash.replace(/^#\/?/, '') || 'painel').split('/');
   const r = ROTAS[nome] ? nome : 'painel';
   if (sheetOpen()) closeSheet();
@@ -117,12 +125,13 @@ async function rotear() {
   const chave = r + '/' + params.join('/');
   if (chave !== rotaAtual) window.scrollTo(0, 0);
   rotaAtual = chave;
+  const v = document.createElement('section'); v.className = 'view';
   try {
     const mod = await ROTAS[r].m();
-    el.innerHTML = ''; const v = document.createElement('section'); v.className = 'view'; el.append(v);
+    el.innerHTML = ''; el.append(v);
     await mod.render(v, params.map(decodeURIComponent));
     document.title = ROTAS[r].t + ' · Clínica Alpha';
-  } catch (e) { fail(e); }
+  } catch (e) { if (v.isConnected && !pendente) fail(e); else console.warn(e); }
 }
 export const recarregar = () => { rotaAtual = ''; rotear(); };
 window.addEventListener('hashchange', rotear);

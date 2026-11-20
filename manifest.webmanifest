@@ -1,0 +1,15 @@
+{
+  "name": "Clínica Alpha · Gestão",
+  "short_name": "Clínica Alpha",
+  "start_url": "./#/painel",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0b0a08",
+  "theme_color": "#0b0a08",
+  "lang": "pt-BR",
+  "icons": [
+    { "src": "img/icone-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "img/icone-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

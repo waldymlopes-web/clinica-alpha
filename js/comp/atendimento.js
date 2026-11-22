@@ -1,8 +1,8 @@
 // Registro técnico do atendimento: procedimento, áreas, quantidades e lotes
-import { sb, q, cache, procById, prodById, procsAtivos } from '../db.js?v=202611220013';
-import { $, $$, esc, openSheet, closeSheet, toast, fail, opt, localInput, fd, nfmt, busy, brl, confirmar } from '../ui.js?v=202611220013';
-import { enviarFotos } from './fotos.js?v=202611220013';
-import { assinarDocumento } from './documentos.js?v=202611220013';
+import { sb, q, cache, procById, prodById, procsAtivos } from '../db.js?v=202611220031';
+import { $, $$, esc, openSheet, closeSheet, toast, fail, opt, localInput, fd, nfmt, busy, brl, confirmar } from '../ui.js?v=202611220031';
+import { enviarFotos } from './fotos.js?v=202611220031';
+import { assinarDocumento } from './documentos.js?v=202611220031';
 
 async function lotesDisponiveis() {
   return await q(sb.from('lotes').select('*').gt('saldo', 0).order('validade', { ascending: true, nullsFirst: false }));

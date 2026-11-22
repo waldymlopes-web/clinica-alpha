@@ -1,8 +1,8 @@
 // Criar e editar agendamentos
-import { sb, q, procsAtivos, procById, pacientesLeves, cache } from '../db.js?v=202611220013';
-import { $, esc, openSheet, closeSheet, toast, fail, opt, localInput, busy, fdt, waLink, first, confirmar, icon } from '../ui.js?v=202611220013';
-import { seletorPaciente, formPaciente } from './paciente.js?v=202611220013';
-import { registrarAtendimento } from './atendimento.js?v=202611220013';
+import { sb, q, procsAtivos, procById, pacientesLeves, cache } from '../db.js?v=202611220031';
+import { $, esc, openSheet, closeSheet, toast, fail, opt, localInput, busy, fdt, waLink, first, confirmar, icon } from '../ui.js?v=202611220031';
+import { seletorPaciente, formPaciente } from './paciente.js?v=202611220031';
+import { registrarAtendimento } from './atendimento.js?v=202611220031';
 
 export const STATUS_AG = { agendado: 'Agendado', confirmado: 'Confirmado', realizado: 'Realizado', faltou: 'Faltou', cancelado: 'Cancelado' };
 

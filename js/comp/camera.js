@@ -1,5 +1,5 @@
 // Câmera ao vivo em tela cheia e editor para marcar a foto
-import { esc, toast } from '../ui.js?v=202611220013';
+import { esc, toast } from '../ui.js?v=202611220031';
 
 const svg = p => `<svg viewBox="0 0 24 24" aria-hidden="true">${p}</svg>`;
 const I = {

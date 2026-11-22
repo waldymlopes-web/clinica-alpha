@@ -1,6 +1,6 @@
 // Painel: resumo do mês, comparativos, agenda de hoje e previsões
-import { sb, q, cache, procById } from '../db.js?v=202611220013';
-import { esc, brl, money, kpi, MES, MES_C, longDate, fh, first, iso, addDays, pct, empty } from '../ui.js?v=202611220013';
+import { sb, q, cache, procById } from '../db.js?v=202611220031';
+import { esc, brl, money, kpi, MES, MES_C, longDate, fh, first, iso, addDays, pct, empty } from '../ui.js?v=202611220031';
 
 export function barrasMensais(atual, anterior, rotulos, destaque) {
   const W = 720, H = 280, L = 52, R = 10, T = 16, B = 30;

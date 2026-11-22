@@ -1,6 +1,6 @@
 // Cadastro de paciente e anamnese
-import { sb, q, invalidarPacientes } from '../db.js?v=202611220013';
-import { $, $$, esc, openSheet, closeSheet, toast, fail, formData, maskCPF, maskTel, maskCEP, opt, busy, fd } from '../ui.js?v=202611220013';
+import { sb, q, invalidarPacientes } from '../db.js?v=202611220031';
+import { $, $$, esc, openSheet, closeSheet, toast, fail, formData, maskCPF, maskTel, maskCEP, opt, busy, fd } from '../ui.js?v=202611220031';
 
 const maskData = v => v.replace(/\D/g, '').slice(0, 8).replace(/(\d{2})(\d)/, '$1/$2').replace(/(\d{2})\/(\d{2})(\d)/, '$1/$2/$3');
 

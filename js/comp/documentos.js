@@ -1,6 +1,6 @@
 // Termos e fichas: preenchimento no tablet, assinatura na tela e PDF arquivado
-import { sb, q, cache, signedUrl } from '../db.js?v=202611220013';
-import { $, $$, esc, openSheet, closeSheet, toast, fail, fd, age, MES, busy, iso } from '../ui.js?v=202611220013';
+import { sb, q, cache, signedUrl } from '../db.js?v=202611220031';
+import { $, $$, esc, openSheet, closeSheet, toast, fail, fd, age, MES, busy, iso } from '../ui.js?v=202611220031';
 
 const f = (k, v, w = 'w-m', ph = '') => `<input class="f ${w}" data-k="${k}" value="${esc(v ?? '')}" placeholder="${esc(ph)}" aria-label="${esc(ph || k)}">`;
 const sig = (k, cap) => `<div class="sig" data-sig="${k}"><canvas></canvas><div class="cap"><span>${esc(cap)}</span><button type="button" data-clear>Limpar</button></div></div>`;

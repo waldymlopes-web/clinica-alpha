@@ -1,7 +1,7 @@
 // Agenda semanal e diária
-import { sb, q, procById } from '../db.js?v=202611220013';
-import { $, $$, esc, SEM_C, MES, MES_C, addDays, iso, fh, icon, empty, brl } from '../ui.js?v=202611220013';
-import { agendar, STATUS_AG } from '../comp/agendar.js?v=202611220013';
+import { sb, q, procById } from '../db.js?v=202611220031';
+import { $, $$, esc, SEM_C, MES, MES_C, addDays, iso, fh, icon, empty, brl } from '../ui.js?v=202611220031';
+import { agendar, STATUS_AG } from '../comp/agendar.js?v=202611220031';
 
 let base = null, modo = null;
 

@@ -1,10 +1,10 @@
 // Avaliação: questionário de queixas, fotos marcadas ao vivo e plano de tratamento sugerido
-import { sb, q, cache, procsAtivos, pacientesLeves, signedUrls, procById } from '../db.js?v=202611220013';
-import { $, $$, esc, ini, fd, age, brl, nfmt, toast, fail, empty, icon, busy, first, confirmar, opt, iso, lightbox } from '../ui.js?v=202611220013';
-import { capturarFoto, marcarFoto } from '../comp/camera.js?v=202611220013';
-import { alertasAnamnese, formPaciente, seletorPaciente } from '../comp/paciente.js?v=202611220013';
-import { elementoParaPDF, salvarPDF, abrirDocumento } from '../comp/documentos.js?v=202611220013';
-import { abrirVenda } from './vendas.js?v=202611220013';
+import { sb, q, cache, procsAtivos, pacientesLeves, signedUrls, procById } from '../db.js?v=202611220031';
+import { $, $$, esc, ini, fd, age, brl, nfmt, toast, fail, empty, icon, busy, first, confirmar, opt, iso, lightbox } from '../ui.js?v=202611220031';
+import { capturarFoto, marcarFoto } from '../comp/camera.js?v=202611220031';
+import { alertasAnamnese, formPaciente, seletorPaciente } from '../comp/paciente.js?v=202611220031';
+import { elementoParaPDF, salvarPDF, abrirDocumento } from '../comp/documentos.js?v=202611220031';
+import { abrirVenda } from './vendas.js?v=202611220031';
 
 // ---------- catálogo de queixas ----------
 // proc: palavra que identifica o procedimento no catálogo · q: quantidade sugerida [leve, moderado, intenso]
@@ -229,12 +229,54 @@ async function passoFotos(B, el) {
   });
 }
 
+
+// ---------- condições de pagamento ----------
+let pgAberto = false;
+const FORMAS_PG = ['Pix', 'Dinheiro', 'Cartão à vista', 'Cartão parcelado'];
+const pgPadrao = () => ({ escopo: 'tudo', forma: 'Pix', parcelas: 3, desc_pct: 0, max_parc: 12 });
+const baseValor = (itens, escopo) => itens.filter(i => i.incluir && (escopo !== 'fase1' || i.fase === 1)).reduce((s, i) => s + Number(i.valor), 0);
+export function calcPag(base, P) {
+  const avista = P.forma === 'Pix' || P.forma === 'Dinheiro';
+  const desconto = avista ? Math.round(base * (Number(P.desc_pct) || 0)) / 100 : 0;
+  const total = Math.round((base - desconto) * 100) / 100;
+  const n = P.forma === 'Cartão parcelado' ? Math.max(2, Number(P.parcelas) || 2) : 1;
+  const parcela = Math.round(total / n * 100) / 100;
+  const texto = P.forma === 'Cartão parcelado' ? `Cartão de crédito em ${n}x de ${brl(parcela, 2)} sem juros` : P.forma === 'Cartão à vista' ? `Cartão de crédito à vista · ${brl(total, 2)}` : `${P.forma} · ${brl(total, 2)}${desconto ? ` (${nfmt(P.desc_pct)}% de desconto)` : ''}`;
+  return { total, desconto, n, parcela, texto };
+}
+function pagamentoHtml(itens, P) {
+  const base = baseValor(itens, P.escopo), c = calcPag(base, P);
+  const temFase2 = itens.some(i => i.incluir && i.fase === 2);
+  const linhaOp = (forma, parc, rot, val, extra = '') => { const on = P.forma === forma && (forma !== 'Cartão parcelado' || Number(P.parcelas) === parc);
+    return `<tr class="click${on ? ' pg-on' : ''}" data-pgsel="${forma}" data-pgn="${parc || ''}"><td>${rot}</td><td class="right num">${val}</td><td class="right small muted">${extra}</td></tr>`; };
+  const pix = calcPag(base, { ...P, forma: 'Pix' });
+  const parcs = []; for (let n = 2; n <= (P.max_parc || 12); n++) parcs.push(n);
+  return `<div class="panel" style="margin-top:16px" id="avPag"><div class="panel-h"><h2>Pagamento</h2><span class="hint">Como a paciente prefere pagar</span></div>
+    <div class="stack">
+      ${temFase2 ? `<div class="field"><span>Valor considerado</span><div class="tabs" style="margin:0"><button type="button" data-pgesc="tudo" aria-pressed="${P.escopo !== 'fase1'}">Plano completo · ${brl(baseValor(itens, 'tudo'))}</button><button type="button" data-pgesc="fase1" aria-pressed="${P.escopo === 'fase1'}">Só a fase 1 · ${brl(baseValor(itens, 'fase1'))}</button></div></div>` : ''}
+      <div class="field"><span>Forma de pagamento</span><div class="tabs" style="margin:0">${FORMAS_PG.map(f => `<button type="button" data-pgforma="${f}" aria-pressed="${P.forma === f}">${f}</button>`).join('')}</div></div>
+      <div class="fields f3">
+        ${P.forma === 'Cartão parcelado' ? `<label class="field"><span>Parcelas</span><select data-pgparc>${parcs.map(n => opt(n, `${n}x de ${brl(calcPag(base, { ...P, parcelas: n }).parcela, 2)}`, P.parcelas)).join('')}</select></label>` : ''}
+        ${P.forma === 'Pix' || P.forma === 'Dinheiro' ? `<label class="field"><span>Desconto no ${P.forma.toLowerCase()} (%)</span><input type="number" min="0" max="50" step="0.5" data-pgdesc value="${P.desc_pct || 0}"></label>` : ''}
+        <div class="field"><span>Condição escolhida</span><div class="gold-t" style="min-height:44px;display:flex;align-items:center;font-size:15px">${esc(c.texto)}</div></div>
+      </div>
+      <details id="pgDet"${pgAberto ? ' open' : ''}><summary class="muted small" style="cursor:pointer;margin-bottom:8px">Ver todas as opções para mostrar à paciente</summary>
+        <div class="tbl-wrap"><table class="pg-tab"><tbody>
+          ${linhaOp('Pix', 0, `Pix ou dinheiro${P.desc_pct ? ` · ${nfmt(P.desc_pct)}% de desconto` : ''}`, brl(pix.total, 2), pix.desconto ? `economia de ${brl(pix.desconto, 2)}` : '')}
+          ${linhaOp('Cartão à vista', 0, 'Cartão de crédito à vista', brl(base, 2))}
+          ${parcs.map(n => linhaOp('Cartão parcelado', n, `Cartão em ${n}x sem juros`, `${n}x de ${brl(Math.round(base / n * 100) / 100, 2)}`, `total ${brl(base, 2)}`)).join('')}
+        </tbody></table></div></details>
+    </div></div>`;
+}
+
 // 5 · plano
 function gerarPlano() { A.plano = { itens: montarPlano(A.respostas), observacoes: A.plano?.observacoes || '' }; }
 
 function passoPlano(B, el) {
   if (!A.plano?.itens) gerarPlano();
   const itens = A.plano.itens, r = A.respostas;
+  if (!A.plano.pagamento) A.plano.pagamento = pgPadrao();
+  const P = A.plano.pagamento;
   const tot = f => itens.filter(i => i.incluir && (f == null || i.fase === f)).reduce((s, i) => s + Number(i.valor), 0);
   const teto = ORCAMENTO_MAX[r.investimento];
   const evento = r.evento ? Math.round((new Date(r.evento + 'T00:00') - new Date()) / 864e5) : null;
@@ -258,11 +300,23 @@ function passoPlano(B, el) {
     <div class="panel">${fase(1)}${fase(2)}
       <label class="field" style="margin-top:18px"><span>Observações para a paciente</span><textarea id="avObs" rows="3" placeholder="ex.: começar pela toxina e voltar em 15 dias para o preenchimento">${esc(A.plano.observacoes || '')}</textarea></label>
       <p class="hint" style="margin:10px 0 0">Sugestão montada a partir das queixas e da tabela de preços. Ajuste quantidades, valores e fases conforme sua avaliação clínica.</p></div>
+    ${pagamentoHtml(itens, A.plano.pagamento)}
     <div class="btns end" style="margin-top:18px"><button class="btn" data-nav="-1">Voltar</button><button class="btn" id="avRefazer">Refazer sugestão</button><button class="btn" id="avPdf">${icon.doc}PDF para a paciente</button><button class="btn" id="avShow">Apresentar para a paciente</button>${A.venda_id ? `<button class="btn gold" id="avVerOrc">Ver orçamento</button>` : `<button class="btn gold" id="avOrc">Gerar orçamento</button>`}</div>`}
     <div id="avPaperWrap" style="position:fixed;left:-10000px;top:0;width:794px"></div>`;
   if (!itens.length) { B.querySelector('[data-nav]')?.remove(); B.innerHTML += rodape(true, ''); return; }
   const re = () => { salvar().catch(fail); passoPlano(B, el); };
+  const det = $('#pgDet', B); if (det) det.ontoggle = () => { pgAberto = det.open; };
+  B.onclick = e => {
+    const f = e.target.closest('[data-pgforma]'), es = e.target.closest('[data-pgesc]'), sel = e.target.closest('[data-pgsel]');
+    if (f) P.forma = f.dataset.pgforma;
+    else if (es) P.escopo = es.dataset.pgesc;
+    else if (sel) { P.forma = sel.dataset.pgsel; if (sel.dataset.pgn) P.parcelas = Number(sel.dataset.pgn); }
+    else return;
+    re();
+  };
   B.onchange = e => {
+    if (e.target.matches('[data-pgparc]')) { P.parcelas = Number(e.target.value); return re(); }
+    if (e.target.matches('[data-pgdesc]')) { P.desc_pct = Math.max(0, Math.min(50, Number(e.target.value) || 0)); return re(); }
     const t = e.target, k = Number(t.dataset.inc ?? t.dataset.qtd ?? t.dataset.val ?? t.dataset.fase); if (isNaN(k)) return; const it = itens[k];
     if (t.dataset.inc != null) it.incluir = t.checked;
     if (t.dataset.qtd != null) { it.qtd = Number(t.value) || 0; it.valor = valorItem(procById(it.procedimento_id), it.qtd); }
@@ -276,9 +330,10 @@ function passoPlano(B, el) {
   $('#avPdf', B).onclick = async e => busy(e.currentTarget, async () => { try { const blob = await pdfPlano(B); const d = await salvarPDF({ paciente_id: A.paciente.id, tipo: 'avaliacao', titulo: 'Plano de tratamento · avaliação ' + fd(new Date()), blob }); abrirDocumento(d.pdf_caminho); toast('PDF salvo nos documentos da paciente.'); } catch (err) { fail(err); } });
   const orc = $('#avOrc', B);
   if (orc) orc.onclick = async e => busy(e.currentTarget, async () => {
-    const inc = itens.filter(i => i.incluir); if (!inc.length) { toast('Inclua pelo menos um procedimento.', true); return; }
+    const inc = itens.filter(i => i.incluir && (P.escopo !== 'fase1' || i.fase === 1)); if (!inc.length) { toast('Inclua pelo menos um procedimento.', true); return; }
+    const cp = calcPag(baseValor(itens, P.escopo), P);
     try {
-      const v = await q(sb.from('vendas').insert({ paciente_id: A.paciente.id, origem: 'orcamento', status: 'orcamento', forma_pagamento: 'Cartão de crédito', parcelas: 1, validade: iso(new Date(Date.now() + 15 * 864e5)), observacoes: A.plano.observacoes || null }).select().single());
+      const v = await q(sb.from('vendas').insert({ paciente_id: A.paciente.id, origem: 'orcamento', status: 'orcamento', forma_pagamento: P.forma.startsWith('Cartão') ? 'Cartão de crédito' : P.forma, parcelas: cp.n, desconto: cp.desconto, validade: iso(new Date(Date.now() + 15 * 864e5)), observacoes: A.plano.observacoes || null }).select().single());
       await q(sb.from('venda_itens').insert(inc.map(i => { const p = procById(i.procedimento_id); const porUn = p.modo_preco === 'por_unidade'; const qtd = porUn || ['sessão', 'frasco', 'seringa'].includes(p.unidade) ? Math.max(porUn ? i.qtd : 1, porUn ? 0.1 : Math.round(i.qtd)) : 1;
         return { venda_id: v.id, procedimento_id: p.id, descricao: `${p.nome} · ${i.areas.join(', ')}`, quantidade: qtd, preco_unit: Math.round(i.valor / qtd * 100) / 100 }; })));
       await q(sb.from('avaliacoes').update({ venda_id: v.id }).eq('id', A.id)); A.venda_id = v.id;
@@ -303,6 +358,10 @@ async function pdfPlano(B) {
     <div class="sec">Procedimentos indicados</div>
     <table><thead><tr><th>Fase</th><th>Procedimento</th><th>Áreas</th><th class="right">Investimento</th></tr></thead><tbody>${itens.sort((a, b) => a.fase - b.fase).map(i => `<tr><td>${i.fase}</td><td>${esc(procById(i.procedimento_id)?.nome)}</td><td>${i.areas.map(esc).join(', ')}</td><td class="right">${brl(i.valor, 2)}</td></tr>`).join('')}</tbody></table>
     <div class="tot"><div class="g"><span>Total</span><span>${brl(itens.reduce((s, i) => s + Number(i.valor), 0), 2)}</span></div></div>
+    ${(() => { const P = A.plano.pagamento || pgPadrao(), base = baseValor(A.plano.itens, P.escopo), pix = calcPag(base, { ...P, forma: 'Pix' }), mx = P.max_parc || 12;
+      return `<div class="sec">Condições de pagamento${P.escopo === 'fase1' ? ' · fase 1' : ''}</div>
+      <p style="margin:0 0 4px"><b>Escolhida:</b> ${esc(calcPag(base, P).texto)}</p>
+      <p style="margin:0 0 4px">Pix ou dinheiro: ${brl(pix.total, 2)}${pix.desconto ? ` (${nfmt(P.desc_pct)}% de desconto)` : ''} · Cartão à vista: ${brl(base, 2)} · Cartão em até ${mx}x de ${brl(Math.round(base / mx * 100) / 100, 2)} sem juros</p>`; })()}
     ${A.plano.observacoes ? `<div class="sec">Observações</div><p>${esc(A.plano.observacoes)}</p>` : ''}
     <p style="font-size:11.5px;color:#6a5f4f;margin-top:16px">Plano sugerido após avaliação. Valores válidos por 15 dias. A indicação final é confirmada no dia do procedimento.</p>
     <p style="text-align:center;margin-top:26px;border-top:1px solid #2b2620;padding-top:6px;max-width:320px;margin-inline:auto;font-size:12px;color:#6a5f4f">${esc(c.profissional || '')} · registro ${esc(c.registro || '')}</p>
@@ -323,6 +382,12 @@ async function apresentar() {
         ${pts(atual).length ? `<div style="margin-bottom:22px">${pts(atual).map(p => `<div class="pt"><span class="mk-n" style="background:${p.cor};width:32px;height:32px;font-size:15px">${p.n}</span><span>${esc(p.texto || 'Ponto ' + p.n)}</span></div>`).join('')}</div>` : ''}
         ${[1, 2].map(f => { const l = itens.filter(i => i.fase === f); return l.length ? `<div class="fase-h"><b>${f === 1 ? 'Primeiro passo' : 'Para completar'}</b></div>${l.map(i => { const p = procById(i.procedimento_id); return `<div class="pt"><span style="flex:1"><b style="font-weight:500;font-size:17px">${esc(p.nome)}</b><br><span class="muted small">${i.queixas.map(esc).join(' · ')}</span></span><span class="num gold-t" style="font-family:var(--display);font-size:22px">${brl(i.valor)}</span></div>`; }).join('')}` : ''; }).join('')}
         <div class="pt" style="border-top:1px solid var(--line)"><span style="flex:1;font-family:var(--display);font-size:22px">Investimento total</span><span class="num" style="font-family:var(--display);font-size:30px;background:var(--metal);-webkit-background-clip:text;background-clip:text;color:transparent">${brl(itens.reduce((s, i) => s + Number(i.valor), 0))}</span></div>
+        ${(() => { const P = A.plano.pagamento || pgPadrao(), base = baseValor(A.plano.itens, P.escopo), c = calcPag(base, P), pix = calcPag(base, { ...P, forma: 'Pix' }), mx = P.max_parc || 12;
+          return `<div class="fase-h"><b>Pagamento${P.escopo === 'fase1' ? ' · primeiro passo' : ''}</b></div>
+          <div class="pt"><span style="flex:1">Pix ou dinheiro${pix.desconto ? ` <span class="chip ok">${nfmt(P.desc_pct)}% off</span>` : ''}</span><span class="num gold-t" style="font-family:var(--display);font-size:22px">${brl(pix.total)}</span></div>
+          <div class="pt"><span style="flex:1">Cartão à vista</span><span class="num gold-t" style="font-family:var(--display);font-size:22px">${brl(base)}</span></div>
+          <div class="pt"><span style="flex:1">Cartão em até ${mx}x sem juros</span><span class="num gold-t" style="font-family:var(--display);font-size:22px">${mx}x de ${brl(Math.round(base / mx * 100) / 100, 2)}</span></div>
+          <p class="small muted" style="margin-top:8px">Condição combinada: ${esc(c.texto)}</p>`; })()}
         ${A.plano.observacoes ? `<p class="muted" style="margin-top:14px">${esc(A.plano.observacoes)}</p>` : ''}</div></div>`;
   };
   draw();

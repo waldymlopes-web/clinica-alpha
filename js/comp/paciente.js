@@ -2,6 +2,8 @@
 import { sb, q, invalidarPacientes } from '../db.js';
 import { $, $$, esc, openSheet, closeSheet, toast, fail, formData, maskCPF, maskTel, maskCEP, opt, busy, fd } from '../ui.js';
 
+const maskData = v => v.replace(/\D/g, '').slice(0, 8).replace(/(\d{2})(\d)/, '$1/$2').replace(/(\d{2})\/(\d{2})(\d)/, '$1/$2/$3');
+
 const ORIGENS = ['Instagram', 'Indicação', 'Google', 'WhatsApp', 'Passou na porta', 'Retorno', 'Outro'];
 
 export function formPaciente(p = {}, onSaved) {
@@ -11,7 +13,7 @@ export function formPaciente(p = {}, onSaved) {
       <div class="panel"><div class="fields">
         <label class="field w2"><span>Nome completo *</span><input name="nome" required value="${esc(p.nome)}" autocomplete="off"></label>
         <label class="field"><span>CPF</span><input name="cpf" inputmode="numeric" value="${esc(p.cpf)}" data-mask="cpf"></label>
-        <label class="field"><span>Nascimento</span><input name="nascimento" type="date" value="${esc(p.nascimento)}"></label>
+        <label class="field"><span>Nascimento</span><input name="nascimento" inputmode="numeric" placeholder="dd/mm/aaaa" maxlength="10" autocomplete="bday" value="${p.nascimento ? fd(p.nascimento) : ''}" data-mask="data"></label>
         <label class="field"><span>WhatsApp *</span><input name="telefone" inputmode="tel" value="${esc(p.telefone)}" data-mask="tel" required></label>
         <label class="field"><span>E-mail</span><input name="email" type="email" value="${esc(p.email)}"></label>
         <label class="field"><span>Sexo</span><select name="sexo">${opt('', '—', p.sexo)}${opt('Feminino', null, p.sexo)}${opt('Masculino', null, p.sexo)}${opt('Outro', null, p.sexo)}</select></label>
@@ -28,12 +30,17 @@ export function formPaciente(p = {}, onSaved) {
       <div class="btns end"><button type="button" class="btn" data-cancel>Cancelar</button><button class="btn gold" id="pacSave">${novo ? 'Cadastrar paciente' : 'Salvar alterações'}</button></div>
     </form>` });
   $$('[data-mask]', b).forEach(i => i.addEventListener('input', () => {
-    const f = { cpf: maskCPF, tel: maskTel, cep: maskCEP }[i.dataset.mask]; const v = f(i.value); if (v !== i.value) i.value = v;
+    const f = { cpf: maskCPF, tel: maskTel, cep: maskCEP, data: maskData }[i.dataset.mask]; const v = f(i.value); if (v !== i.value) i.value = v;
   }));
   $('[data-cancel]', b).onclick = closeSheet;
   $('#pacForm', b).onsubmit = async e => {
     e.preventDefault();
     const d = formData($('#pacForm', b));
+    if (d.nascimento) {
+      const [dd, mm, aa] = d.nascimento.split('/').map(Number), dt = new Date(aa, mm - 1, dd);
+      if (!aa || aa < 1900 || dt.getFullYear() !== aa || dt.getMonth() !== mm - 1 || dt.getDate() !== dd || dt > new Date()) { toast('Data de nascimento inválida. Use o formato dd/mm/aaaa, por exemplo 14/03/1980.', true); return; }
+      d.nascimento = `${aa}-${String(mm).padStart(2, '0')}-${String(dd).padStart(2, '0')}`;
+    }
     if (!d.nome) { toast('Informe o nome da paciente.', true); return; }
     if (!d.telefone) { toast('Informe o WhatsApp: ele é usado no pós-venda.', true); return; }
     await busy($('#pacSave', b), async () => {

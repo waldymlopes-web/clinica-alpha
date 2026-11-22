@@ -47,6 +47,7 @@ async function prontuario(el, id, aba) {
       <div class="btns">
         ${p.telefone ? `<a class="btn icon" href="${waLink(p.telefone, `Oi, ${first(p.nome)}! `)}" target="_blank" rel="noopener" title="WhatsApp" aria-label="Abrir WhatsApp">${icon.wa}</a>` : ''}
         <button class="btn icon" id="pEdit" title="Editar cadastro" aria-label="Editar cadastro">${icon.edit}</button>
+        <a class="btn" href="#/avaliacao/nova/${p.id}">Avaliação</a>
         <button class="btn" id="pAgendar">Agendar</button>
         <button class="btn" id="pVenda">Orçamento / venda</button>
         <button class="btn gold" id="pAtender">Registrar atendimento</button>

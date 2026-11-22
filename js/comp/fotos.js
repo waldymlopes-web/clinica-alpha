@@ -3,7 +3,7 @@ import { sb, q, cache, procById, signedUrls } from '../db.js';
 import { $, $$, esc, openSheet, closeSheet, toast, fail, opt, iso, fd, busy, lightbox, empty, icon } from '../ui.js';
 
 export const ANGULOS = ['Frente', 'Perfil direito', 'Perfil esquerdo', '45° direito', '45° esquerdo', 'Detalhe'];
-export const MOMENTOS = { antes: 'Antes', depois: 'Depois', retorno: 'Retorno' };
+export const MOMENTOS = { antes: 'Antes', depois: 'Depois', retorno: 'Retorno', avaliacao: 'Avaliação' };
 
 // Reduz a foto para no máximo 2000px, JPEG 0,85
 async function comprimir(file) {
@@ -23,7 +23,7 @@ export function enviarFotos({ paciente, atendimento = null, procedimento_id = nu
     <div class="panel stack">
       <div class="fields">
         <label class="field w2"><span>Procedimento</span><select id="ftProc">${opt('', '—', procedimento_id)}${procs.map(p => opt(p.id, p.nome, procedimento_id)).join('')}</select></label>
-        <label class="field"><span>Momento</span><select id="ftMom">${Object.entries(MOMENTOS).map(([k, v]) => opt(k, v, momento)).join('')}</select></label>
+        <label class="field"><span>Momento</span><select id="ftMom">${Object.entries(MOMENTOS).filter(([k]) => k !== 'avaliacao').map(([k, v]) => opt(k, v, momento)).join('')}</select></label>
         <label class="field"><span>Data</span><input type="date" id="ftData" value="${atendimento ? iso(atendimento.data) : iso(new Date())}"></label>
         <label class="field w2"><span>Área</span><input id="ftArea" list="ftAreas" placeholder="ex.: Lábios"><datalist id="ftAreas"></datalist></label>
       </div>

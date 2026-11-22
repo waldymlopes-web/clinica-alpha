@@ -1,10 +1,10 @@
 // Vendas: orçamentos, ordens de serviço, vendas diretas e pagamentos
-import { sb, q, cache, procById, procsAtivos, pacientesLeves, totalVenda } from '../db.js';
-import { $, $$, esc, openSheet, closeSheet, toast, fail, opt, fd, iso, addDays, brl, money, kpi, pct, empty, icon, waLink, first, busy, confirmar } from '../ui.js';
-import { seletorPaciente, formPaciente } from '../comp/paciente.js';
-import { registrarAtendimento } from '../comp/atendimento.js';
-import { agendar } from '../comp/agendar.js';
-import { elementoParaPDF, salvarPDF, abrirDocumento } from '../comp/documentos.js';
+import { sb, q, cache, procById, procsAtivos, pacientesLeves, totalVenda } from '../db.js?v=202611220013';
+import { $, $$, esc, openSheet, closeSheet, toast, fail, opt, fd, iso, addDays, brl, money, kpi, pct, empty, icon, waLink, first, busy, confirmar } from '../ui.js?v=202611220013';
+import { seletorPaciente, formPaciente } from '../comp/paciente.js?v=202611220013';
+import { registrarAtendimento } from '../comp/atendimento.js?v=202611220013';
+import { agendar } from '../comp/agendar.js?v=202611220013';
+import { elementoParaPDF, salvarPDF, abrirDocumento } from '../comp/documentos.js?v=202611220013';
 
 const ETAPAS = [['orcamento', 'Orçamentos', 'Aguardando resposta'], ['aprovado', 'Ordens de serviço', 'Aprovadas, a realizar'], ['realizado', 'Realizados', 'Aguardando pagamento'], ['pago', 'Pagos', 'Últimos 30 dias']];
 const FORMAS = ['Pix', 'Dinheiro', 'Cartão de débito', 'Cartão de crédito', 'Transferência'];

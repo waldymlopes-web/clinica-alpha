@@ -1,6 +1,6 @@
 // Relatórios técnicos e de negócio por procedimento, quantidade aplicada e frequência
-import { sb, q, cache, procById, prodById } from '../db.js';
-import { $, $$, esc, iso, addDays, fd, brl, nfmt, money, kpi, MES_C, empty, opt, pct, icon } from '../ui.js';
+import { sb, q, cache, procById, prodById } from '../db.js?v=202611220013';
+import { $, $$, esc, iso, addDays, fd, brl, nfmt, money, kpi, MES_C, empty, opt, pct, icon } from '../ui.js?v=202611220013';
 
 let F = null;
 const csv = (nome, linhas) => {

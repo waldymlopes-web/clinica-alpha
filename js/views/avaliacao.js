@@ -1,10 +1,10 @@
 // Avaliação: questionário de queixas, fotos marcadas ao vivo e plano de tratamento sugerido
-import { sb, q, cache, procsAtivos, pacientesLeves, signedUrls, procById } from '../db.js';
-import { $, $$, esc, ini, fd, age, brl, nfmt, toast, fail, empty, icon, busy, first, confirmar, opt, iso, lightbox } from '../ui.js';
-import { capturarFoto, marcarFoto } from '../comp/camera.js';
-import { alertasAnamnese, formPaciente, seletorPaciente } from '../comp/paciente.js';
-import { elementoParaPDF, salvarPDF, abrirDocumento } from '../comp/documentos.js';
-import { abrirVenda } from './vendas.js';
+import { sb, q, cache, procsAtivos, pacientesLeves, signedUrls, procById } from '../db.js?v=202611220013';
+import { $, $$, esc, ini, fd, age, brl, nfmt, toast, fail, empty, icon, busy, first, confirmar, opt, iso, lightbox } from '../ui.js?v=202611220013';
+import { capturarFoto, marcarFoto } from '../comp/camera.js?v=202611220013';
+import { alertasAnamnese, formPaciente, seletorPaciente } from '../comp/paciente.js?v=202611220013';
+import { elementoParaPDF, salvarPDF, abrirDocumento } from '../comp/documentos.js?v=202611220013';
+import { abrirVenda } from './vendas.js?v=202611220013';
 
 // ---------- catálogo de queixas ----------
 // proc: palavra que identifica o procedimento no catálogo · q: quantidade sugerida [leve, moderado, intenso]

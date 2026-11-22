@@ -1,7 +1,7 @@
 // Banco de imagens de antes e depois, por procedimento
-import { cache } from '../db.js';
-import { $, $$, esc, opt } from '../ui.js';
-import { galeria } from '../comp/fotos.js';
+import { cache } from '../db.js?v=202611220013';
+import { $, $$, esc, opt } from '../ui.js?v=202611220013';
+import { galeria } from '../comp/fotos.js?v=202611220013';
 
 let proc = '';
 export async function render(el) {

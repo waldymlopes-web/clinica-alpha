@@ -1,8 +1,8 @@
 // Pós-venda: contatos do dia com mensagem pronta
-import { sb, q, cache, procById, mensagem } from '../db.js';
-import { $, $$, esc, ini, fd, iso, addDays, today, waLink, first, copiar, toast, fail, empty, kpi, pct, icon, longDate, daysBetween } from '../ui.js';
-import { agendar } from '../comp/agendar.js';
-import { atualizarBadges } from '../main.js';
+import { sb, q, cache, procById, mensagem } from '../db.js?v=202611220013';
+import { $, $$, esc, ini, fd, iso, addDays, today, waLink, first, copiar, toast, fail, empty, kpi, pct, icon, longDate, daysBetween } from '../ui.js?v=202611220013';
+import { agendar } from '../comp/agendar.js?v=202611220013';
+import { atualizarBadges } from '../main.js?v=202611220013';
 
 const TIPO = { d1: ['Pós D+1', 'ok'], revisao: ['Revisão', 'ok'], sessao: ['Próxima sessão', 'info'], manutencao: ['Manutenção', 'warn'], orcamento: ['Orçamento', 'mute'], reativacao: ['Reativação', 'mute'], aniversario: ['Aniversário', ''], inativa: ['Sem vir há tempo', 'bad'], outro: ['Contato', 'mute'] };
 let aba = 'hoje';

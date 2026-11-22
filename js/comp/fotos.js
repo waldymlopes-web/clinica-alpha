@@ -1,6 +1,6 @@
 // Fotos de antes e depois: envio, galeria e comparação
-import { sb, q, cache, procById, signedUrls } from '../db.js';
-import { $, $$, esc, openSheet, closeSheet, toast, fail, opt, iso, fd, busy, lightbox, empty, icon } from '../ui.js';
+import { sb, q, cache, procById, signedUrls } from '../db.js?v=202611220013';
+import { $, $$, esc, openSheet, closeSheet, toast, fail, opt, iso, fd, busy, lightbox, empty, icon } from '../ui.js?v=202611220013';
 
 export const ANGULOS = ['Frente', 'Perfil direito', 'Perfil esquerdo', '45° direito', '45° esquerdo', 'Detalhe'];
 export const MOMENTOS = { antes: 'Antes', depois: 'Depois', retorno: 'Retorno', avaliacao: 'Avaliação' };

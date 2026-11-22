@@ -1,7 +1,7 @@
 // Estoque por lote e validade, entradas, ajustes e sugestão de compra
-import { sb, q, cache, prodById, loadRefs } from '../db.js';
-import { $, $$, esc, openSheet, closeSheet, toast, fail, opt, fd, iso, addDays, brl, money, kpi, nfmt, empty, icon, busy, daysBetween, formData } from '../ui.js';
-import { atualizarBadges } from '../main.js';
+import { sb, q, cache, prodById, loadRefs } from '../db.js?v=202611220013';
+import { $, $$, esc, openSheet, closeSheet, toast, fail, opt, fd, iso, addDays, brl, money, kpi, nfmt, empty, icon, busy, daysBetween, formData } from '../ui.js?v=202611220013';
+import { atualizarBadges } from '../main.js?v=202611220013';
 
 const CATS = ['Toxina', 'Preenchedor', 'Bioestimulador', 'Skinbooster', 'Anestésico', 'Descartáveis', 'Dermocosméticos', 'Outros'];
 let aba = 'produtos';

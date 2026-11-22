@@ -1,12 +1,12 @@
 // Pacientes e prontuário completo
-import { sb, q, cache, procById, pacientesLeves, totalVenda } from '../db.js';
-import { $, $$, esc, ini, age, fd, fdt, brl, nfmt, empty, icon, waLink, first, fail, toast, confirmar } from '../ui.js';
-import { formPaciente, formAnamnese, ANAMNESE, alertasAnamnese } from '../comp/paciente.js';
-import { registrarAtendimento, verAtendimento } from '../comp/atendimento.js';
-import { enviarFotos, galeria } from '../comp/fotos.js';
-import { assinarDocumento, abrirDocumento, TIPOS } from '../comp/documentos.js';
-import { agendar } from '../comp/agendar.js';
-import { novaVenda } from './vendas.js';
+import { sb, q, cache, procById, pacientesLeves, totalVenda } from '../db.js?v=202611220013';
+import { $, $$, esc, ini, age, fd, fdt, brl, nfmt, empty, icon, waLink, first, fail, toast, confirmar } from '../ui.js?v=202611220013';
+import { formPaciente, formAnamnese, ANAMNESE, alertasAnamnese } from '../comp/paciente.js?v=202611220013';
+import { registrarAtendimento, verAtendimento } from '../comp/atendimento.js?v=202611220013';
+import { enviarFotos, galeria } from '../comp/fotos.js?v=202611220013';
+import { assinarDocumento, abrirDocumento, TIPOS } from '../comp/documentos.js?v=202611220013';
+import { agendar } from '../comp/agendar.js?v=202611220013';
+import { novaVenda } from './vendas.js?v=202611220013';
 
 const ABAS = { resumo: 'Resumo', atendimentos: 'Atendimentos', fotos: 'Fotos', documentos: 'Documentos', anamnese: 'Anamnese', financeiro: 'Financeiro' };
 let busca = '';

@@ -1,6 +1,6 @@
 // Ajustes: catálogo de procedimentos, dados da clínica, taxas, mensagens, segurança e cópia de segurança
-import { sb, q, cache, loadRefs } from '../db.js';
-import { $, $$, esc, openSheet, closeSheet, toast, fail, opt, brl, empty, icon, busy, formData, iso } from '../ui.js';
+import { sb, q, cache, loadRefs } from '../db.js?v=202611220013';
+import { $, $$, esc, openSheet, closeSheet, toast, fail, opt, brl, empty, icon, busy, formData, iso } from '../ui.js?v=202611220013';
 
 const UNIDADES = ['U', 'ml', 'frasco', 'seringa', 'sessão', 'área'];
 const CATS = ['Injetável', 'Bioestimulador', 'Facial', 'Corporal', 'Capilar', 'Outro'];
